@@ -1,0 +1,33 @@
+{
+  "name": "fastgram-server1",
+  "version": "1.0.0",
+  "description": "FastGram Server 1 — Express + Socket.IO + REST API (core social features)",
+  "main": "src/index.js",
+  "type": "commonjs",
+  "scripts": {
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js",
+    "seed": "node prisma/seed.js",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.22.0",
+    "axios": "^1.7.7",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "ioredis": "^5.4.1",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "multer": "^2.0.1",
+    "socket.io": "^4.8.1"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^9.2.0",
+    "nodemon": "^3.1.7",
+    "prisma": "^5.22.0"
+  }
+}

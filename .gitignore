@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+**/node_modules/
+.pnp
+.pnp.js
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+*.egg-info/
+
+# Environment
+.env
+**/.env
+!**/.env.example
+
+# Builds
+.next/
+out/
+dist/
+build/
+
+# Uploads (user generated media)
+server1/uploads/*
+!server1/uploads/.gitkeep
+
+# Logs
+*.log
+npm-debug.log*
+logs/
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Prisma
+server1/prisma/migrations/dev.db*

@@ -1,0 +1,114 @@
+// FastGram — Server 1 database schema (PostgreSQL "fastgram_main")
+// This is the SOURCE OF TRUTH for all core social data.
+// Server 2 keeps a lightweight synced copy for content discovery/analytics.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  email     String   @unique
+  password  String // bcrypt hash
+  fullName  String
+  bio       String   @default("")
+  avatarUrl String   @default("")
+  createdAt DateTime @default(now())
+
+  posts         Post[]
+  comments      Comment[]
+  likes         Like[]
+  following     Follow[]       @relation("Following") // rows where I am the follower
+  followers     Follow[]       @relation("Followers") // rows where I am being followed
+  sentMsgs      Message[]      @relation("SentMessages")
+  receivedMsgs  Message[]      @relation("ReceivedMessages")
+  notifications Notification[] @relation("NotifRecipient")
+  actedNotifs   Notification[] @relation("NotifActor")
+}
+
+model Post {
+  id        Int      @id @default(autoincrement())
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId  Int
+  caption   String   @default("")
+  mediaUrl  String // relative path, e.g. /uploads/abc.jpg
+  mediaType String // "image" | "video"
+  hashtags  String[] @default([]) // parsed from caption, e.g. ["sunset","travel"]
+  createdAt DateTime @default(now())
+
+  comments Comment[]
+  likes    Like[]
+
+  @@index([authorId])
+  @@index([createdAt])
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId    Int
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId  Int
+  text      String
+  createdAt DateTime @default(now())
+
+  @@index([postId])
+}
+
+model Like {
+  id        Int      @id @default(autoincrement())
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  createdAt DateTime @default(now())
+
+  @@unique([postId, userId]) // a user can like a post only once
+  @@index([userId])
+}
+
+model Follow {
+  id          Int      @id @default(autoincrement())
+  follower    User     @relation("Following", fields: [followerId], references: [id], onDelete: Cascade)
+  followerId  Int
+  following   User     @relation("Followers", fields: [followingId], references: [id], onDelete: Cascade)
+  followingId Int
+  createdAt   DateTime @default(now())
+
+  @@unique([followerId, followingId]) // can't follow the same person twice
+  @@index([followingId])
+}
+
+model Message {
+  id         Int      @id @default(autoincrement())
+  sender     User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  senderId   Int
+  receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  receiverId Int
+  text       String
+  read       Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@index([senderId, receiverId])
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  recipient User     @relation("NotifRecipient", fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  actor     User     @relation("NotifActor", fields: [actorId], references: [id], onDelete: Cascade)
+  actorId   Int
+  type      String // "like" | "comment" | "follow" | "message"
+  postId    Int? // optional, for like/comment
+  text      String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
